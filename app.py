@@ -218,7 +218,7 @@ def calculate_risk():
 
 
 if __name__ == '__main__':
-    port = Config.PORT
+    port = int(os.getenv('PORT', Config.PORT))
     debug = Config.FLASK_DEBUG
 
     print(f"""
