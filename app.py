@@ -5,7 +5,6 @@ Flask-based REST API for price action analysis
 from flask import Flask, jsonify, request, render_template
 from flask_cors import CORS
 from src.scanner import ForexScanner
-from src.oanda_client import OandaClient
 from src.support_resistance import SupportResistance
 from config import Config
 import os
@@ -26,10 +25,17 @@ def index():
 @app.route('/api/health')
 def health():
     """Health check endpoint"""
+    api_configured = False
+    if Config.DATA_PROVIDER == 'alphavantage':
+        api_configured = bool(Config.ALPHAVANTAGE_API_KEY and Config.ALPHAVANTAGE_API_KEY != 'demo')
+    else:
+        api_configured = bool(Config.OANDA_API_KEY)
+
     return jsonify({
         'status': 'healthy',
         'version': '1.0.0',
-        'api_configured': bool(Config.OANDA_API_KEY)
+        'data_provider': Config.DATA_PROVIDER,
+        'api_configured': api_configured
     })
 
 
@@ -134,7 +140,14 @@ def get_price(pair):
         JSON: Current price data
     """
     try:
-        client = OandaClient()
+        # Use appropriate client
+        if Config.DATA_PROVIDER == 'alphavantage':
+            from src.alphavantage_client import AlphaVantageClient
+            client = AlphaVantageClient()
+        else:
+            from src.oanda_client import OandaClient
+            client = OandaClient()
+
         price = client.get_current_price(pair)
 
         if price:
@@ -179,8 +192,14 @@ def calculate_risk():
         account_size = float(data.get('account_size', 10000))
         risk_percent = float(data.get('risk_percent', 1))
 
-        # Get data for S/R levels
-        client = OandaClient()
+        # Get data for S/R levels using appropriate client
+        if Config.DATA_PROVIDER == 'alphavantage':
+            from src.alphavantage_client import AlphaVantageClient
+            client = AlphaVantageClient()
+        else:
+            from src.oanda_client import OandaClient
+            client = OandaClient()
+
         df = client.get_candles(pair, granularity='H4', count=200)
 
         if df is None:

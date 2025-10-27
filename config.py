@@ -10,7 +10,13 @@ load_dotenv()
 class Config:
     """Application configuration"""
 
-    # OANDA API Settings
+    # Data Provider Selection
+    DATA_PROVIDER = os.getenv('DATA_PROVIDER', 'alphavantage')  # 'oanda' or 'alphavantage'
+
+    # Alpha Vantage API Settings (FREE - 25 requests/day)
+    ALPHAVANTAGE_API_KEY = os.getenv('ALPHAVANTAGE_API_KEY', 'demo')
+
+    # OANDA API Settings (Alternative)
     OANDA_API_KEY = os.getenv('OANDA_API_KEY', '')
     OANDA_ACCOUNT_ID = os.getenv('OANDA_ACCOUNT_ID', '')
     OANDA_ENVIRONMENT = os.getenv('OANDA_ENVIRONMENT', 'practice')

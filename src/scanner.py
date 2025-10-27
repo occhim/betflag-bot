@@ -1,7 +1,6 @@
 """
 Multi-pair Pattern Scanner for Forex
 """
-from src.oanda_client import OandaClient
 from src.pattern_detector import PatternDetector
 from src.support_resistance import SupportResistance
 from config import Config
@@ -14,7 +13,14 @@ class ForexScanner:
 
     def __init__(self):
         """Initialize scanner"""
-        self.client = OandaClient()
+        # Choose data provider based on configuration
+        if Config.DATA_PROVIDER == 'alphavantage':
+            from src.alphavantage_client import AlphaVantageClient
+            self.client = AlphaVantageClient()
+        else:
+            from src.oanda_client import OandaClient
+            self.client = OandaClient()
+
         self.pairs = Config.DEFAULT_PAIRS
         self.timeframes = Config.TIMEFRAMES
 
